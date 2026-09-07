@@ -1,0 +1,9 @@
+{
+  "name": "motolink-miniprogram",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MotoLink WeChat Mini Program with Tencent TRTC audio",
+  "dependencies": {
+    "trtc-wx-sdk": "1.1.15"
+  }
+}
