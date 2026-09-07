@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""Generate the MotoLink MVP scaffold, then remove bootstrap artifacts."""
+"""Generate the MotoLink MVP scaffold from a verified embedded archive."""
 from __future__ import annotations
 
 import base64
 import hashlib
 import io
 from pathlib import Path
-import shutil
 import tarfile
 
 ARCHIVE_SHA256 = "bf8c8e4736f1d05675067b7b65e7427331a3c81c60803b91cb4788e7f36decfc"
@@ -82,8 +81,9 @@ def main() -> None:
                 raise RuntimeError(f"Unsafe archive member: {member.name}")
         tar.extractall(root)
 
-    shutil.rmtree(root / "scripts", ignore_errors=True)
-    (root / ".github/workflows/bootstrap-scaffold.yml").unlink(missing_ok=True)
+    # The workflow's token cannot add/update workflow files. Keep the
+    # bootstrap workflow and let the GitHub connector add final CI later.
+    (root / ".github/workflows/ci.yml").unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
