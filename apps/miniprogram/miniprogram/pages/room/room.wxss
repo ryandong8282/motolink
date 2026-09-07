@@ -9,6 +9,23 @@
     #0b0d10;
 }
 
+/* 原生组件不能 display:none，否则 TRTC 无法推拉流。缩到最小并移出可视区域。 */
+.rtc-native-layer {
+  position: fixed;
+  left: -20rpx;
+  top: -20rpx;
+  width: 4rpx;
+  height: 4rpx;
+  overflow: hidden;
+  opacity: 0.01;
+  pointer-events: none;
+}
+
+.rtc-native-node {
+  width: 4rpx;
+  height: 4rpx;
+}
+
 .room-header {
   display: flex;
   align-items: flex-start;
@@ -94,13 +111,22 @@
   gap: 18rpx;
   margin-top: 18rpx;
   padding: 18rpx 22rpx;
+  border: 1rpx solid rgba(232, 171, 55, 0.24);
   border-radius: 20rpx;
   background: rgba(22, 25, 31, 0.88);
+}
+
+.rtc-banner.connected {
+  border-color: rgba(76, 193, 122, 0.34);
 }
 
 .rtc-icon {
   color: #e8ab37;
   font-size: 38rpx;
+}
+
+.rtc-banner.connected .rtc-icon {
+  color: #4cc17a;
 }
 
 .rtc-copy {
@@ -119,6 +145,12 @@
   font-size: 21rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.network-hint {
+  margin-top: 5rpx;
+  color: #70c58f;
+  font-size: 19rpx;
 }
 
 .floor-status {

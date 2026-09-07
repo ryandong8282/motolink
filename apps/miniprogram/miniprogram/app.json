@@ -36,6 +36,9 @@
   "permission": {
     "scope.userLocation": {
       "desc": "用于发现附近车友，并在加入车队后共享骑行位置"
+    },
+    "scope.record": {
+      "desc": "用于加入车队后进行实时语音对讲"
     }
   },
   "requiredPrivateInfos": [

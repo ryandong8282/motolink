@@ -1,4 +1,49 @@
 <view class="room-page">
+  <!-- TRTC 必须由页面中的原生 live-pusher/live-player 承载；不能 display:none。 -->
+  <view class="rtc-native-layer" aria-hidden="true">
+    <live-pusher
+      id="{{pusher.id}}"
+      class="rtc-native-node"
+      url="{{pusher.url}}"
+      mode="{{pusher.mode}}"
+      autopush="{{false}}"
+      enable-camera="{{pusher.enableCamera}}"
+      enable-mic="{{pusher.enableMic}}"
+      enable-agc="{{pusher.enableAgc}}"
+      enable-ans="{{pusher.enableAns}}"
+      audio-quality="{{pusher.audioQuality}}"
+      audio-volume-type="{{pusher.audioVolumeType}}"
+      bindstatechange="onPusherStateChange"
+      bindnetstatus="onPusherNetStatus"
+      binderror="onPusherError"
+      bindaudiovolumenotify="onPusherAudioVolumeNotify"
+    />
+
+    <live-player
+      wx:for="{{playerList}}"
+      wx:key="id"
+      id="{{item.id}}"
+      class="rtc-native-node"
+      src="{{item.src}}"
+      mode="{{item.mode}}"
+      autoplay="{{item.autoplay}}"
+      mute-audio="{{item.muteAudio}}"
+      mute-video="{{item.muteVideo}}"
+      min-cache="{{item.minCache}}"
+      max-cache="{{item.maxCache}}"
+      sound-mode="{{item.soundMode}}"
+      auto-pause-if-navigate="{{item.autoPauseIfNavigate}}"
+      auto-pause-if-open-native="{{item.autoPauseIfOpenNative}}"
+      data-userid="{{item.userID}}"
+      data-streamid="{{item.streamID}}"
+      data-streamtype="{{item.streamType}}"
+      bindstatechange="onPlayerStateChange"
+      bindnetstatus="onPlayerNetStatus"
+      bindfullscreenchange="onPlayerFullscreenChange"
+      bindaudiovolumenotify="onPlayerAudioVolumeNotify"
+    />
+  </view>
+
   <view class="room-header">
     <view>
       <view class="eyebrow">LIVE RIDE ROOM</view>
@@ -12,7 +57,7 @@
 
   <view class="status-grid">
     <view class="status-card {{connectionTone}}">
-      <view class="status-label">实时通道</view>
+      <view class="status-label">抢麦控制</view>
       <view class="status-value">{{connectionState}}</view>
     </view>
     <view class="status-card">
@@ -21,11 +66,14 @@
     </view>
   </view>
 
-  <view class="rtc-banner">
+  <view class="rtc-banner {{rtcConnected ? 'connected' : ''}}">
     <view class="rtc-icon">◉</view>
     <view class="rtc-copy">
-      <view class="rtc-title">{{rtcMode === 'mock' ? '语音尚未接线' : '实时语音已连接'}}</view>
+      <view class="rtc-title">
+        {{rtcMode === 'mock' ? '语音演示模式' : rtcConnected ? '腾讯 TRTC 纯音频' : 'TRTC 正在连接'}}
+      </view>
       <view class="muted">{{rtcStatusText}}</view>
+      <view wx:if="{{rtcMode === 'trtc' && rtcConnected}}" class="network-hint">{{rtcNetworkText}}</view>
     </view>
   </view>
 
@@ -58,7 +106,7 @@
   </scroll-view>
 
   <view class="bottom-actions">
-    <view class="safety-note">骑行时请固定手机并优先使用耳机，禁止手持操作。</view>
+    <view class="safety-note">首版先验证手机麦克风与扬声器；头盔蓝牙按键及专用音频适配暂不包含。</view>
     <button class="leave-button" bindtap="onLeaveTeam">退出车队</button>
   </view>
 </view>

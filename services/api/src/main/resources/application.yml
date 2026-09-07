@@ -23,4 +23,8 @@ motolink:
   floor-lease: 45s
   floor-reaper-interval-ms: 1000
   location-online-window: 60s
-  rtc-provider: mock
+  rtc-provider: ${RTC_PROVIDER:trtc}
+  trtc:
+    sdk-app-id: ${TRTC_SDK_APP_ID:0}
+    secret-key: ${TRTC_SECRET_KEY:}
+    user-sig-ttl: ${TRTC_USER_SIG_TTL:24h}

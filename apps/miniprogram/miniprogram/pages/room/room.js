@@ -13,8 +13,14 @@ Page({
     members: [],
     connectionState: '初始化中',
     connectionTone: 'warning',
-    rtcMode: 'mock',
-    rtcStatusText: 'Mock RTC：仅验证抢麦流程',
+    rtcMode: config.rtcMode,
+    rtcConnected: false,
+    rtcStatusText: config.rtcMode === 'trtc'
+      ? '正在连接腾讯 TRTC 纯音频通道'
+      : 'Mock RTC：仅验证抢麦流程',
+    rtcNetworkText: '等待网络质量数据',
+    pusher: {},
+    playerList: [],
     floorHolderId: '',
     floorHolderName: '当前无人讲话',
     isTalking: false,
@@ -28,9 +34,17 @@ Page({
     this.session = session;
     this.teamId = options.teamId;
     this.locationUserIds = new Set();
+    this.pressActive = false;
+    this.cleanedUp = false;
     this.setData({ teamId: this.teamId });
     wx.setKeepScreenOn({ keepScreenOn: true });
     this.initialize();
+  },
+
+  onHide() {
+    // 进入后台时无法继续可靠地保持“按住”手势，立即关麦，避免意外持续采集。
+    this.pressActive = false;
+    this.stopLocalPublishingForSafety();
   },
 
   onUnload() {
@@ -60,14 +74,16 @@ Page({
       const rtcMode = this.rtc.getMode();
       this.setData({
         rtcMode,
+        rtcConnected: true,
         rtcStatusText: rtcMode === 'mock'
           ? 'Mock RTC：抢麦状态可用，暂不传输真实声音'
-          : 'TRTC 已连接',
+          : '腾讯 TRTC 纯音频已连接 · 基础降噪开启',
       });
 
       this.connectRealtime();
       this.startTimers();
     } catch (error) {
+      await this.cleanup();
       wx.showModal({
         title: '无法进入车队',
         content: error.message,
@@ -86,6 +102,7 @@ Page({
           connectionState: '连接波动，正在恢复',
           connectionTone: 'warning',
         });
+        this.stopLocalPublishingForSafety();
       },
     });
     this.socket.connect();
@@ -116,6 +133,11 @@ Page({
       closed: ['连接已关闭', 'danger'],
     }[state] || ['连接状态未知', 'warning'];
     this.setData({ connectionState: view[0], connectionTone: view[1] });
+
+    if (state !== 'connected') {
+      this.pressActive = false;
+      this.stopLocalPublishingForSafety();
+    }
   },
 
   async onRealtimeEvent(event) {
@@ -145,6 +167,7 @@ Page({
         await this.onFloorGranted(payload);
         break;
       case 'FLOOR_DENIED':
+        this.pressActive = false;
         this.setData({ pressPending: false });
         wx.showToast({
           title: payload.reason || '当前有人占麦',
@@ -156,6 +179,8 @@ Page({
         await this.onFloorReleased(payload);
         break;
       case 'ERROR':
+        this.pressActive = false;
+        await this.stopLocalPublishingForSafety();
         wx.showToast({ title: payload.message || '实时消息错误', icon: 'none' });
         break;
       default:
@@ -168,17 +193,32 @@ Page({
     this.setData({
       floorHolderId: lease.userId,
       floorHolderName: mine ? '你正在讲话' : `${lease.nickname} 正在讲话`,
-      isTalking: mine,
+      isTalking: false,
       pressPending: false,
     });
-    if (mine && this.rtc) {
-      try {
-        await this.rtc.startPublishing();
-        wx.vibrateShort({ type: 'light' });
-      } catch (error) {
+
+    if (!mine || !this.rtc) return;
+
+    // 麦权返回前手指可能已经松开。此时必须立即归还，绝不能再开启麦克风。
+    if (!this.pressActive) {
+      this.releaseFloor();
+      return;
+    }
+
+    try {
+      await this.rtc.startPublishing();
+      if (!this.pressActive) {
+        await this.rtc.stopPublishing();
         this.releaseFloor();
-        wx.showToast({ title: error.message, icon: 'none' });
+        return;
       }
+      this.setData({ isTalking: true });
+      wx.vibrateShort({ type: 'light' });
+    } catch (error) {
+      this.pressActive = false;
+      await this.stopLocalPublishingForSafety();
+      this.releaseFloor();
+      wx.showToast({ title: error.message, icon: 'none', duration: 2500 });
     }
   },
 
@@ -186,6 +226,7 @@ Page({
     if (payload.userId === this.session.userId && this.rtc) {
       await this.rtc.stopPublishing();
     }
+    this.pressActive = false;
     this.setData({
       floorHolderId: '',
       floorHolderName: '当前无人讲话',
@@ -196,27 +237,141 @@ Page({
 
   onPressStart() {
     if (!this.socket || this.data.pressPending || this.data.isTalking) return;
+    if (!this.data.rtcConnected) {
+      wx.showToast({ title: '语音通道尚未连接', icon: 'none', duration: 1200 });
+      return;
+    }
     if (this.data.floorHolderId && this.data.floorHolderId !== this.session.userId) {
       wx.showToast({ title: '请等对方说完', icon: 'none', duration: 1000 });
       return;
     }
+
+    this.pressActive = true;
     this.setData({ pressPending: true });
     const sent = this.socket.send('FLOOR_REQUEST');
     if (!sent) {
+      this.pressActive = false;
       this.setData({ pressPending: false });
       wx.showToast({ title: '实时连接尚未恢复', icon: 'none', duration: 1200 });
     }
   },
 
-  onPressEnd() {
-    if (!this.data.isTalking && !this.data.pressPending) return;
-    if (this.rtc) this.rtc.stopPublishing();
-    this.releaseFloor();
+  async onPressEnd() {
+    if (!this.data.isTalking && !this.data.pressPending && !this.pressActive) return;
+    this.pressActive = false;
+    try {
+      if (this.rtc) await this.rtc.stopPublishing();
+    } finally {
+      this.releaseFloor();
+    }
   },
 
   releaseFloor() {
     if (this.socket) this.socket.send('FLOOR_RELEASE');
     this.setData({ isTalking: false, pressPending: false });
+  },
+
+  async stopLocalPublishingForSafety() {
+    if (this.rtc) {
+      try {
+        await this.rtc.stopPublishing();
+      } catch (error) {
+        console.warn('[rtc] stop publishing failed', error.message);
+      }
+    }
+    this.setData({ isTalking: false, pressPending: false });
+    if (this.socket) this.socket.send('FLOOR_RELEASE');
+  },
+
+  onRtcJoining() {
+    this.setData({
+      rtcConnected: false,
+      rtcStatusText: '正在进入腾讯 TRTC 纯音频房间',
+    });
+  },
+
+  onRtcJoined() {
+    this.setData({
+      rtcConnected: true,
+      rtcStatusText: '腾讯 TRTC 纯音频已连接 · 基础降噪开启',
+    });
+  },
+
+  onRtcLeft() {
+    this.setData({
+      rtcConnected: false,
+      rtcStatusText: '已退出腾讯 TRTC 房间',
+    });
+  },
+
+  onRtcPublishingChanged(publishing) {
+    if (!publishing) this.setData({ isTalking: false });
+  },
+
+  onRtcNetworkUpdate(status) {
+    const quality = status && status.quality;
+    let text = '网络质量未知';
+    if (quality === 1 || quality === 2) text = '语音网络良好';
+    else if (quality === 3 || quality === 4) text = '语音网络一般';
+    else if (quality >= 5) text = '语音网络较差，可能出现卡顿';
+    this.setData({ rtcNetworkText: text });
+  },
+
+  async onRtcError(message) {
+    this.pressActive = false;
+    await this.stopLocalPublishingForSafety();
+    this.setData({
+      rtcConnected: false,
+      rtcStatusText: message || '腾讯 TRTC 音频通道发生错误',
+    });
+  },
+
+  onPusherStateChange(event) {
+    if (this.rtc && typeof this.rtc.handlePusherStateChange === 'function') {
+      this.rtc.handlePusherStateChange(event);
+    }
+  },
+
+  onPusherNetStatus(event) {
+    if (this.rtc && typeof this.rtc.handlePusherNetStatus === 'function') {
+      this.rtc.handlePusherNetStatus(event);
+    }
+  },
+
+  onPusherError(event) {
+    if (this.rtc && typeof this.rtc.handlePusherError === 'function') {
+      this.rtc.handlePusherError(event);
+    }
+  },
+
+  onPusherAudioVolumeNotify(event) {
+    if (this.rtc && typeof this.rtc.handlePusherAudioVolumeNotify === 'function') {
+      this.rtc.handlePusherAudioVolumeNotify(event);
+    }
+  },
+
+  onPlayerStateChange(event) {
+    if (this.rtc && typeof this.rtc.handlePlayerStateChange === 'function') {
+      this.rtc.handlePlayerStateChange(event);
+    }
+  },
+
+  onPlayerNetStatus(event) {
+    if (this.rtc && typeof this.rtc.handlePlayerNetStatus === 'function') {
+      this.rtc.handlePlayerNetStatus(event);
+    }
+  },
+
+  onPlayerFullscreenChange(event) {
+    if (this.rtc && typeof this.rtc.handlePlayerFullscreenChange === 'function') {
+      this.rtc.handlePlayerFullscreenChange(event);
+    }
+  },
+
+  onPlayerAudioVolumeNotify(event) {
+    if (this.rtc && typeof this.rtc.handlePlayerAudioVolumeNotify === 'function') {
+      this.rtc.handlePlayerAudioVolumeNotify(event);
+    }
   },
 
   onCopyCode() {
@@ -228,7 +383,7 @@ Page({
     if (!result) return;
     try {
       await api.leaveTeam(this.teamId);
-      this.cleanup();
+      await this.cleanup();
       wx.navigateBack();
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
@@ -236,6 +391,9 @@ Page({
   },
 
   async cleanup() {
+    if (this.cleanedUp) return;
+    this.cleanedUp = true;
+    this.pressActive = false;
     clearInterval(this.heartbeatTimer);
     clearInterval(this.locationTimer);
     if (this.socket) {
