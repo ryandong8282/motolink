@@ -1,0 +1,49 @@
+:root {
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #1d252a;
+  background: #f3f5f7;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 1024px; }
+.layout { min-height: 100vh; }
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e6e8eb;
+  background: #111a1f;
+  color: white;
+}
+.brand { display: flex; gap: 12px; align-items: center; padding: 28px 22px; }
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: #e4512e;
+  font-weight: 900;
+  font-size: 22px;
+}
+.brand strong, .brand small { display: block; }
+.brand small { margin-top: 3px; color: #91a0a8; }
+.menu { border-right: 0; background: transparent; }
+.menu .el-menu-item { color: #cdd5d9; }
+.menu .el-menu-item:hover, .menu .el-menu-item.is-active {
+  color: white;
+  background: rgba(228, 81, 46, .24);
+}
+.warning { margin: auto 18px 22px; color: #8d9aa1; font-size: 12px; line-height: 1.6; }
+.header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e5e7ea;
+  background: white;
+}
+.header > div { display: flex; gap: 12px; align-items: center; }
+.header span { padding: 4px 9px; border-radius: 999px; color: #a34429; background: #fff0eb; font-size: 12px; }
+.content { padding: 28px; }
+.page-title { margin: 0 0 20px; font-size: 28px; }
+.metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.metric-value { margin-top: 12px; font-size: 38px; font-weight: 900; }
+.section { margin-top: 22px; }

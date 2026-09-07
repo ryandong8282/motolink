@@ -1,33 +1,60 @@
 services:
   postgres:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:16-3.5
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-motolink}
       POSTGRES_USER: ${POSTGRES_USER:-motolink}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-motolink_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-motolink_dev_only}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
-      - motolink-postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-motolink} -d ${POSTGRES_DB:-motolink}"]
       interval: 5s
-      timeout: 3s
+      timeout: 5s
       retries: 20
 
   redis:
     image: redis:7.4-alpine
     command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "6379:6379"
     volumes:
-      - motolink-redis:/data
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 20
 
+  api:
+    build:
+      context: ./services/api
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-motolink}
+      DB_USERNAME: ${POSTGRES_USER:-motolink}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-motolink_dev_only}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MOTOLINK_SEED_DEMO: ${MOTOLINK_SEED_DEMO:-true}
+      MOTOLINK_CORS_ORIGINS: ${MOTOLINK_CORS_ORIGINS:-http://localhost:5173,http://localhost:8081}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: ./apps/admin
+    ports:
+      - "8081:80"
+    depends_on:
+      - api
+
 volumes:
-  motolink-postgres:
-  motolink-redis:
+  postgres_data:
+  redis_data:

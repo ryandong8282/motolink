@@ -1,0 +1,170 @@
+openapi: 3.1.0
+info:
+  title: MotoLink MVP API
+  version: 0.1.0
+  description: 开发阶段契约。除登录外，业务接口暂用 X-User-Id，外测前必须替换为正式认证。
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/v1/auth/dev-login:
+    post:
+      summary: 开发环境登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, nickname]
+              properties:
+                phone: { type: string }
+                nickname: { type: string }
+      responses:
+        '200':
+          description: 登录成功
+  /api/v1/nearby/location:
+    post:
+      summary: 更新在线位置
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LocationUpdate' }
+      responses:
+        '200': { description: 已更新 }
+  /api/v1/nearby:
+    get:
+      summary: 查询附近在线车友
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - { name: latitude, in: query, required: true, schema: { type: number } }
+        - { name: longitude, in: query, required: true, schema: { type: number } }
+        - { name: radiusKm, in: query, schema: { type: number, default: 10, maximum: 10 } }
+      responses:
+        '200': { description: 陌生人坐标已模糊化 }
+  /api/v1/rooms:
+    post:
+      summary: 创建车队
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                maxMembers: { type: integer, default: 20 }
+                publicRoom: { type: boolean, default: true }
+      responses:
+        '200': { description: 创建成功 }
+  /api/v1/rooms/join:
+    post:
+      summary: 通过房间号加入车队
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roomCode]
+              properties:
+                roomCode: { type: string, minLength: 6, maxLength: 6 }
+      responses:
+        '200': { description: 加入成功 }
+  /api/v1/rooms/{roomId}/floor/request:
+    post:
+      summary: 请求麦权
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/RoomId'
+      responses:
+        '200':
+          description: 抢麦结果
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FloorResponse' }
+  /api/v1/rooms/{roomId}/floor/heartbeat:
+    post:
+      summary: 麦权续租
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/RoomId'
+      responses:
+        '200': { description: 续租结果 }
+  /api/v1/rooms/{roomId}/floor/release:
+    post:
+      summary: 释放麦权
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/RoomId'
+      responses:
+        '200': { description: 已释放 }
+  /api/v1/rides:
+    post:
+      summary: 开始骑行
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200': { description: 骑行会话 }
+  /api/v1/rides/{rideId}/points:
+    post:
+      summary: 追加轨迹点
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - { name: rideId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [latitude, longitude, speedKmh]
+              properties:
+                latitude: { type: number }
+                longitude: { type: number }
+                speedKmh: { type: number }
+                recordedAt: { type: string, format: date-time }
+      responses:
+        '200': { description: 已追加 }
+  /api/v1/rides/{rideId}/finish:
+    post:
+      summary: 结束骑行
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - { name: rideId, in: path, required: true, schema: { type: string, format: uuid } }
+      responses:
+        '200': { description: 已结束 }
+components:
+  parameters:
+    UserId:
+      name: X-User-Id
+      in: header
+      required: true
+      schema: { type: string, format: uuid }
+    RoomId:
+      name: roomId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    LocationUpdate:
+      type: object
+      required: [latitude, longitude]
+      properties:
+        latitude: { type: number }
+        longitude: { type: number }
+        speedKmh: { type: number }
+        heading: { type: number }
+    FloorResponse:
+      type: object
+      required: [granted, leaseMillis]
+      properties:
+        granted: { type: boolean }
+        speakerId: { type: [string, 'null'], format: uuid }
+        leaseMillis: { type: integer }
