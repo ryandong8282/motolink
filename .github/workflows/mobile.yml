@@ -1,0 +1,36 @@
+name: Mobile
+
+on:
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/riding_core/**"
+      - "pubspec.yaml"
+      - ".github/workflows/mobile.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - "packages/riding_core/**"
+      - "pubspec.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve workspace dependencies
+        run: flutter pub get
+      - name: Analyze mobile app
+        working-directory: apps/mobile
+        run: flutter analyze
+      - name: Run widget tests
+        working-directory: apps/mobile
+        run: flutter test
