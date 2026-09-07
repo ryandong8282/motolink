@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-motolink}
+      POSTGRES_USER: ${POSTGRES_USER:-motolink}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-motolink_dev_only}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-motolink} -d ${POSTGRES_DB:-motolink}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - motolink-postgres:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - motolink-redis:/data
+
+  api:
+    build:
+      context: ./services/api
+    environment:
+      SERVER_PORT: 8080
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-motolink}
+      DB_USERNAME: ${POSTGRES_USER:-motolink}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-motolink_dev_only}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:8088}
+      MOTOLINK_RTC_PROVIDER: ${MOTOLINK_RTC_PROVIDER:-mock}
+      MOTOLINK_RTC_APP_ID: ${MOTOLINK_RTC_APP_ID:-}
+      MOTOLINK_RTC_APP_SECRET: ${MOTOLINK_RTC_APP_SECRET:-}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: ./apps/admin
+    ports:
+      - "${ADMIN_PORT:-8088}:80"
+    depends_on:
+      - api
+
+volumes:
+  motolink-postgres:
+  motolink-redis:
