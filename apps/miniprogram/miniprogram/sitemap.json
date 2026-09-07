@@ -1,0 +1,9 @@
+{
+  "desc": "MotoLink MVP sitemap",
+  "rules": [
+    {
+      "action": "disallow",
+      "page": "*"
+    }
+  ]
+}

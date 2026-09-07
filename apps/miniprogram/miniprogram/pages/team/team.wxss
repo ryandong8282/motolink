@@ -1,0 +1,152 @@
+.team-page {
+  padding-top: 26rpx;
+}
+
+.hero-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28rpx;
+}
+
+.eyebrow {
+  margin-bottom: 8rpx;
+  color: #ff6b2c;
+  font-size: 21rpx;
+  font-weight: 800;
+  letter-spacing: 4rpx;
+}
+
+.page-title {
+  font-size: 52rpx;
+  font-weight: 900;
+  letter-spacing: -2rpx;
+}
+
+.live-dot {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: #16191f;
+  color: #8f96a2;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #4cc17a;
+}
+
+.form-row,
+.join-row {
+  display: flex;
+  gap: 18rpx;
+}
+
+.number-input {
+  width: 42%;
+}
+
+.switch-field {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  padding: 0 18rpx 0 22rpx;
+  border: 1rpx solid #303642;
+  border-radius: 20rpx;
+  background: #0f1217;
+  color: #bdc2ca;
+  font-size: 25rpx;
+}
+
+.join-card {
+  margin-top: 8rpx;
+}
+
+.code-input {
+  flex: 1;
+  margin-bottom: 0;
+  font-size: 36rpx;
+  letter-spacing: 8rpx;
+}
+
+.join-button {
+  width: 180rpx;
+  margin: 0;
+}
+
+.empty-card {
+  padding: 40rpx 30rpx;
+  border: 1rpx dashed #303642;
+  border-radius: 24rpx;
+  text-align: center;
+}
+
+.empty-title {
+  margin-bottom: 10rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.team-card {
+  display: flex;
+  min-height: 180rpx;
+  margin-bottom: 18rpx;
+  overflow: hidden;
+  border: 1rpx solid #252a33;
+  border-radius: 26rpx;
+  background: #16191f;
+}
+
+.team-main {
+  flex: 1;
+  padding: 26rpx;
+}
+
+.team-name {
+  margin-bottom: 10rpx;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.route-note {
+  min-height: 36rpx;
+  font-size: 24rpx;
+}
+
+.team-meta {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.code-area {
+  display: flex;
+  width: 210rpx;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #20242c;
+}
+
+.code-label,
+.copy-label {
+  color: #7f8692;
+  font-size: 19rpx;
+  letter-spacing: 2rpx;
+}
+
+.room-code {
+  margin: 8rpx 0;
+  color: #ff824f;
+  font-size: 38rpx;
+  font-weight: 900;
+  letter-spacing: 3rpx;
+}

@@ -1,0 +1,15 @@
+{
+  "description": "MotoLink 微信小程序 MVP",
+  "miniprogramRoot": "miniprogram/",
+  "compileType": "miniprogram",
+  "setting": {
+    "useCompilerPlugins": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "urlCheck": false
+  },
+  "appid": "touristappid",
+  "projectname": "motolink-mvp"
+}

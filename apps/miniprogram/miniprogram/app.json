@@ -1,0 +1,50 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/home/home",
+    "pages/team/team",
+    "pages/room/room",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "navigationBarTitleText": "MotoLink",
+    "navigationBarBackgroundColor": "#111318",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0b0d10",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#858b96",
+    "selectedColor": "#ff6b2c",
+    "backgroundColor": "#111318",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "附近"
+      },
+      {
+        "pagePath": "pages/team/team",
+        "text": "车队"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于发现附近车友，并在加入车队后共享骑行位置"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "networkTimeout": {
+    "request": 10000,
+    "connectSocket": 10000
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

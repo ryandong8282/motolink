@@ -1,0 +1,64 @@
+<view class="room-page">
+  <view class="room-header">
+    <view>
+      <view class="eyebrow">LIVE RIDE ROOM</view>
+      <view class="room-name">{{team ? team.name : '正在进入车队...'}}</view>
+    </view>
+    <view class="room-code" bindtap="onCopyCode">
+      <view class="code-label">房间码</view>
+      <view>{{roomCode || '------'}}</view>
+    </view>
+  </view>
+
+  <view class="status-grid">
+    <view class="status-card {{connectionTone}}">
+      <view class="status-label">实时通道</view>
+      <view class="status-value">{{connectionState}}</view>
+    </view>
+    <view class="status-card">
+      <view class="status-label">位置在线</view>
+      <view class="status-value">{{onlineLocationCount}} 人</view>
+    </view>
+  </view>
+
+  <view class="rtc-banner">
+    <view class="rtc-icon">◉</view>
+    <view class="rtc-copy">
+      <view class="rtc-title">{{rtcMode === 'mock' ? '语音尚未接线' : '实时语音已连接'}}</view>
+      <view class="muted">{{rtcStatusText}}</view>
+    </view>
+  </view>
+
+  <view class="floor-status {{isTalking ? 'mine' : ''}}">
+    <view class="wave-dot"></view>
+    <view>{{floorHolderName}}</view>
+  </view>
+
+  <view class="ptt-zone">
+    <view
+      class="ptt-button {{isTalking ? 'talking' : ''}} {{pressPending ? 'pending' : ''}}"
+      bindtouchstart="onPressStart"
+      bindtouchend="onPressEnd"
+      bindtouchcancel="onPressEnd"
+    >
+      <view class="ptt-inner">
+        <view class="mic-icon">●</view>
+        <view class="ptt-title">{{isTalking ? '正在讲话' : pressPending ? '正在抢麦' : '按住讲话'}}</view>
+        <view class="ptt-hint">{{isTalking ? '松开立即停止' : 'PUSH TO TALK'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view class="member-strip" scroll-x enable-flex>
+    <view wx:for="{{members}}" wx:key="userId" class="member-item">
+      <view class="member-avatar {{floorHolderId === item.userId ? 'speaking' : ''}}">{{item.avatarText}}</view>
+      <view class="member-name">{{item.nickname}}</view>
+      <view class="member-role">{{item.roleText}}</view>
+    </view>
+  </scroll-view>
+
+  <view class="bottom-actions">
+    <view class="safety-note">骑行时请固定手机并优先使用耳机，禁止手持操作。</view>
+    <button class="leave-button" bindtap="onLeaveTeam">退出车队</button>
+  </view>
+</view>

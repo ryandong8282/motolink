@@ -1,0 +1,25 @@
+<view class="page profile-page">
+  <view class="profile-card">
+    <view class="avatar">{{avatarText}}</view>
+    <view class="profile-copy">
+      <view class="nickname">{{session ? session.nickname : ''}}</view>
+      <view class="muted">{{session ? session.userId : ''}}</view>
+    </view>
+    <view class="badge">MVP</view>
+  </view>
+
+  <view class="section-title">当前版本</view>
+  <view class="card info-card">
+    <view class="info-row"><text>客户端</text><text class="muted">微信原生小程序</text></view>
+    <view class="info-row"><text>RTC</text><text class="accent">Mock Provider</text></view>
+    <view class="info-row"><text>位置</text><text class="muted">前台主动更新</text></view>
+    <view class="info-row"><text>数据</text><text class="muted">服务端内存存储</text></view>
+  </view>
+
+  <view class="card warning-card">
+    <view class="warning-title">这不是救援服务</view>
+    <view class="muted">当前产品仅验证组队、位置和对讲交互，不保证锁屏后台持续运行，也不替代紧急救援或专业导航。</view>
+  </view>
+
+  <button class="danger-button" bindtap="onLogout">退出登录</button>
+</view>
