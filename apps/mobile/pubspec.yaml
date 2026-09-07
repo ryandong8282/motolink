@@ -1,0 +1,26 @@
+name: motolink_mobile
+description: MotoLink motorcycle team and push-to-talk MVP.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.5.0
+  permission_handler: ^12.0.1
+  web_socket_channel: ^3.0.3
+  riding_core:
+    path: ../../packages/riding_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
