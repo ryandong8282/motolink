@@ -1,0 +1,20 @@
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Java
+services/api/target/
+*.log
+
+# WeChat DevTools local settings
+apps/miniprogram/project.private.config.json
+apps/miniprogram/miniprogram_npm/
+apps/miniprogram/node_modules/
+
+# Runtime / secrets
+.env
+*.local.yml
+*.local.yaml
+secrets/
