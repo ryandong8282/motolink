@@ -1,0 +1,26 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+
+spring:
+  application:
+    name: motolink-api
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+motolink:
+  session-ttl: 24h
+  floor-lease: 45s
+  floor-reaper-interval-ms: 1000
+  location-online-window: 60s
+  rtc-provider: mock

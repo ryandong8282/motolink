@@ -1,0 +1,53 @@
+<view class="page team-page">
+  <view class="hero-row">
+    <view>
+      <view class="eyebrow">RIDE TOGETHER</view>
+      <view class="page-title">车队房间</view>
+    </view>
+    <view class="live-dot"><view class="dot"></view> MVP</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">创建车队</view>
+    <input class="input" data-key="teamName" value="{{teamName}}" maxlength="30" placeholder="车队名称" bindinput="onInput" />
+    <input class="input" data-key="routeNote" value="{{routeNote}}" maxlength="100" placeholder="路线备注（可选）" bindinput="onInput" />
+    <view class="form-row">
+      <input class="input number-input" data-key="maxMembers" value="{{maxMembers}}" type="number" placeholder="人数上限" bindinput="onInput" />
+      <view class="switch-field">
+        <text>公开房间</text>
+        <switch color="#ff6b2c" checked="{{publicRoom}}" bindchange="onPublicChange" />
+      </view>
+    </view>
+    <button class="primary-button" loading="{{creating}}" disabled="{{creating}}" bindtap="onCreateTeam">创建并进入</button>
+  </view>
+
+  <view class="card join-card">
+    <view class="card-title">使用房间码加入</view>
+    <view class="join-row">
+      <input class="input code-input" data-key="roomCode" value="{{roomCode}}" maxlength="6" type="number" placeholder="6 位房间码" bindinput="onInput" />
+      <button class="secondary-button join-button" loading="{{joining}}" disabled="{{joining}}" bindtap="onJoinTeam">加入</button>
+    </view>
+  </view>
+
+  <view class="section-title">我的车队</view>
+  <view wx:if="{{teams.length === 0}}" class="empty-card">
+    <view class="empty-title">还没有车队</view>
+    <view class="muted">创建一个房间，或者输入朋友发来的 6 位房间码。</view>
+  </view>
+
+  <view wx:for="{{teams}}" wx:key="id" class="team-card" data-team-id="{{item.id}}" bindtap="onTeamTap">
+    <view class="team-main">
+      <view class="team-name">{{item.name}}</view>
+      <view class="muted route-note">{{item.routeNote || '暂未填写路线'}}</view>
+      <view class="team-meta">
+        <text class="badge">{{item.memberCountText}}</text>
+        <text class="badge">{{item.publicRoom ? '公开' : '私密'}}</text>
+      </view>
+    </view>
+    <view class="code-area" catchtap="onCopyCode" data-code="{{item.roomCode}}">
+      <view class="code-label">ROOM</view>
+      <view class="room-code">{{item.roomCode}}</view>
+      <view class="copy-label">点按复制</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,52 @@
+<view class="page home-page">
+  <view class="top-row">
+    <view>
+      <view class="eyebrow">LIVE NEARBY</view>
+      <view class="page-title">附近车友</view>
+      <view class="muted">{{lastUpdatedText}}</view>
+    </view>
+    <picker
+      mode="selector"
+      range="{{radiusOptions}}"
+      range-key="label"
+      value="{{radiusIndex}}"
+      bindchange="onRadiusChange"
+    >
+      <view class="radius-picker">{{radiusOptions[radiusIndex].label}} ▾</view>
+    </picker>
+  </view>
+
+  <map
+    class="map"
+    latitude="{{latitude}}"
+    longitude="{{longitude}}"
+    markers="{{markers}}"
+    scale="13"
+    show-location
+  />
+
+  <view class="privacy-tip">
+    <text class="tip-icon">◎</text>
+    <text>附近页只展示约百米级模糊位置；精确坐标仅应在加入同一车队后共享。</text>
+  </view>
+
+  <view class="row section-heading">
+    <view class="section-title">在线车友</view>
+    <button class="mini-button" loading="{{loading}}" bindtap="onRefreshTap">刷新</button>
+  </view>
+
+  <view wx:if="{{nearby.length === 0}}" class="empty-card">
+    <view class="empty-icon">🏍️</view>
+    <view class="empty-title">附近暂时没人在线</view>
+    <view class="muted">可以先去“车队”创建房间，把房间码发给朋友。</view>
+  </view>
+
+  <view wx:for="{{nearby}}" wx:key="userId" class="rider-card">
+    <view class="avatar">{{item.avatarText}}</view>
+    <view class="rider-info">
+      <view class="rider-name">{{item.nickname}}</view>
+      <view class="muted">位置刚刚更新</view>
+    </view>
+    <view class="distance">{{item.distanceText}}</view>
+  </view>
+</view>

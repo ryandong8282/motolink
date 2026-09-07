@@ -1,0 +1,28 @@
+<view class="login-page">
+  <view class="hero">
+    <view class="logo-mark">M</view>
+    <view class="title">MotoLink</view>
+    <view class="subtitle">骑在路上，也别和队友失联</view>
+  </view>
+
+  <view class="login-card">
+    <view class="card-title">MVP 开发态登录</view>
+    <view class="muted intro">先用昵称跑通车队、位置和抢麦流程。商用版会替换为微信登录和手机号绑定。</view>
+    <input
+      class="input"
+      maxlength="20"
+      placeholder="输入骑行昵称"
+      placeholder-class="placeholder"
+      value="{{nickname}}"
+      bindinput="onNicknameInput"
+    />
+    <button
+      class="primary-button"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+      bindtap="onSubmit"
+    >进入 MotoLink</button>
+  </view>
+
+  <view class="notice">当前版本仅用于封闭技术验证，不代表已完成商用 RTC、后台保活或救援能力。</view>
+</view>

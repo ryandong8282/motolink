@@ -1,0 +1,69 @@
+.profile-page {
+  padding-top: 38rpx;
+}
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  padding: 34rpx;
+  border: 1rpx solid #252a33;
+  border-radius: 30rpx;
+  background: #16191f;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 104rpx;
+  height: 104rpx;
+  margin-right: 24rpx;
+  border-radius: 34rpx;
+  background: #ff6b2c;
+  color: #101216;
+  font-size: 44rpx;
+  font-weight: 900;
+}
+
+.profile-copy {
+  flex: 1;
+}
+
+.nickname {
+  margin-bottom: 9rpx;
+  font-size: 36rpx;
+  font-weight: 800;
+}
+
+.info-card {
+  padding-top: 10rpx;
+  padding-bottom: 10rpx;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #252a33;
+  font-size: 26rpx;
+}
+
+.info-row:last-child {
+  border-bottom: 0;
+}
+
+.warning-card {
+  border-color: rgba(232, 171, 55, 0.28);
+}
+
+.warning-title {
+  margin-bottom: 10rpx;
+  color: #e8ab37;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.warning-card .muted {
+  font-size: 24rpx;
+  line-height: 1.65;
+}
